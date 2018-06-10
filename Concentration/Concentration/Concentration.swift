@@ -7,8 +7,7 @@
 //
 
 import Foundation
-extension Array
-{
+extension Array {
     /** Randomizes the order of an array's elements. */
     mutating func shuffle()
     {
@@ -22,25 +21,54 @@ extension Array
 class Concentration {
     
     var cards = [Card]()
-    var indexOfOnlyOneFaceUp : Int?
+    var indexOfOnlyOneFaceUp : Int? {
+        get {
+            return cards.indices.filter { cards[$0].isFaceUp }.oneAndOnly
+//            let faceUpCardIndices = cards.indices.filter { cards[$0].isFaceUp }
+//            return faceUpCardIndices.count == 1 ? faceUpCardIndices.first : nil
+//            var indexFound : Int?
+//            for index in cards.indices {
+//                if cards[index].isFaceUp {
+//                    if indexFound == nil {
+//                        indexFound = index
+//                    } else {
+//                        return nil
+//                    }
+//                }
+//            }
+//            return indexFound
+        }
+        set {
+            for index in cards.indices {
+                cards[index].isFaceUp = (index == newValue)
+            }
+        }
+    }
+    
+    var faceUpCards: [Int?] {
+        return cards.indices.filter {
+            cards[$0].isFaceUp
+        }
+    }
+    
+    
+    func reset () {
+        cards = [Card]()
+        Card.myIdentifierFactory = 0
+        indexOfOnlyOneFaceUp = nil
+    }
     
     func chooseCard (at index:Int) {
         if !cards[index].isMatched {
             if let matchIndex = indexOfOnlyOneFaceUp, matchIndex != index {
                 // One card is face up
-                if cards[matchIndex].identifier == cards[index].identifier  {
+                if cards[matchIndex] == cards[index]  {
                     cards[matchIndex].isMatched = true
                     cards[index].isMatched = true
                 }
                 cards[index].isFaceUp = true
-                indexOfOnlyOneFaceUp = nil
-                
             } else {
                 //Either no cards are face up or 2 cards are face up
-                for flipDownIndex in cards.indices {
-                    cards[flipDownIndex].isFaceUp = false
-                }
-                cards[index].isFaceUp = true
                 indexOfOnlyOneFaceUp = index
             }
         }
@@ -53,5 +81,11 @@ class Concentration {
         }
         // TODO: Shuffle the cards
         cards.shuffle()
+    }
+}
+
+extension Collection {
+    var oneAndOnly: Element? {
+        return count == 1 ? first : nil
     }
 }
